@@ -1,15 +1,15 @@
 from sklearn import metrics
-from sklearn.neural_network import MLPClassifier
-import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn import preprocessing
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
+
+from Utility import extractData
+
+
 class NeuralNetwork:
 
     def classify(self, data_file, encode):
-        data = pd.read_csv(data_file)
-        X = data.iloc[:, :-1]
-        Y = data.iloc[:, -1]
+        X, Y = extractData(data_file)
 
         enc = LabelEncoder()
 

@@ -3,13 +3,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
+from Utility import extractData
+
+
 class SupportVectorMachine:
 
    def classify(self, data_file, encode, kernel):
-        data = pd.read_csv(data_file)
-        X= data.iloc[:, :-1]
-        Y = data.iloc[:, -1]
-
+        X, Y = extractData(data_file)
         enc = LabelEncoder()
 
         if encode:

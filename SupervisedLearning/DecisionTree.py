@@ -4,12 +4,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import GradientBoostingClassifier
 
+from Utility import extractData
+
+
 class DecisionTree:
 
    def classify(self, data_file, encode):
-        data = pd.read_csv(data_file)
-        X= data.iloc[:, :-1]
-        Y = data.iloc[:, -1]
+        # data = pd.read_csv(data_file)
+        X, Y = extractData(data_file)
 
         enc = LabelEncoder()
 
@@ -33,10 +35,10 @@ class DecisionTree:
 
         print('Accuracy of Decision Tree(depth={}) = {:.2f}%'.format(classify_model.get_depth(),accuracy))
 
+
+
    def classifyWithBoost(self, data_file, encode):
-        data = pd.read_csv(data_file)
-        X = data.iloc[:, :-1]
-        Y = data.iloc[:, -1]
+        X, Y = extractData(data_file)
 
         enc = LabelEncoder()
 
@@ -63,10 +65,10 @@ def main():
     treeClassify.classify("winequality-red.csv", encode=False)
     print('------- DecisionTree with Boost - Classification for : WineQuality-Red -------')
     treeClassify.classifyWithBoost("winequality-red.csv", encode=False)
-    print('------- DecisionTree - Classification for : Diabetes detection -------')
-    treeClassify.classify("diabetes_data_upload.csv", encode=True)
-    print('------- DecisionTree with Boost - Classification for : Diabetes detection -------')
-    treeClassify.classifyWithBoost("diabetes_data_upload.csv", encode=True)
+    print('------- DecisionTree - Classification for : Fraud detection -------')
+    treeClassify.classify("fraud_detection.csv", encode=True)
+    print('------- DecisionTree with Boost - Classification for : Fraud detection -------')
+    treeClassify.classifyWithBoost("fraud_detection.csv", encode=True)
 
 if __name__ == "__main__":
     main()
