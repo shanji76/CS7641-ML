@@ -30,7 +30,7 @@ class KNNClassifier:
         classify_model =  classifier.fit(train_x, train_y)
         accuracy = classify_model.score(test_x, test_y) * 100
 
-        print('Accuracy of SVC(k={}) = {:.2f}%'.format(k,accuracy))
+        print('Accuracy of KNN(k={}) = {:.2f}%'.format(k,accuracy))
 
 def main():
     knnClassify = KNNClassifier()

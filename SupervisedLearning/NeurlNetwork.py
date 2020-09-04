@@ -24,7 +24,7 @@ class NeuralNetwork:
 
         train_x, test_x, train_y, test_y = train_test_split(X, Y, test_size=0.3)
 
-        classifier = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(50,),random_state=123,activation='tanh',max_iter=300)
+        classifier = MLPClassifier(solver='lbfgs', hidden_layer_sizes=(50,),random_state=123,activation='tanh',max_iter=500)
         classify_model = classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
         accuracy = metrics.accuracy_score(test_y, pred_y) * 100

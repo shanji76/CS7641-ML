@@ -1,4 +1,4 @@
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -25,11 +25,17 @@ class SupportVectorMachine:
         train_x, test_x, train_y,test_y = train_test_split(X,Y, test_size=0.3, random_state=123)
 
 
-        classifier = SVC(kernel=kernel)
+        classifier = self.getSVCForKernel(kernel)
         classify_model =  classifier.fit(train_x, train_y)
         accuracy = classify_model.score(test_x, test_y) * 100
 
-        print('Accuracy of SVC(kernel={}) = {:.2f}%'.format(classify_model.kernel,accuracy))
+        print('Accuracy of SVC(kernel={}) = {:.2f}%'.format(kernel,accuracy))
+
+   def getSVCForKernel(self, kernel):
+       if kernel == 'linear':
+           return LinearSVC(random_state=0, tol=1e-5)
+       return SVC(kernel=kernel)
+
 
 def main():
     svcClassify = SupportVectorMachine()
