@@ -3,12 +3,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from Utility import extractData
+from Utility import extractData, plotPerformance
 
 
 class SupportVectorMachine:
 
-   def classify(self, data_file, encode, kernel):
+   def classify(self, data_file, encode, kernel, label):
         X, Y = extractData(data_file)
         enc = LabelEncoder()
 
@@ -27,24 +27,14 @@ class SupportVectorMachine:
 
         classifier = self.getSVCForKernel(kernel)
         classify_model =  classifier.fit(train_x, train_y)
+        pred_y = classify_model.predict(test_x)
         accuracy = classify_model.score(test_x, test_y) * 100
 
         print('Accuracy of SVC(kernel={}) = {:.2f}%'.format(kernel,accuracy))
+
+        plotPerformance(test_y, pred_y, label, 'Algorithm: Support Vector Machines(kernel={})'.format(kernel))
 
    def getSVCForKernel(self, kernel):
        if kernel == 'linear':
            return LinearSVC(random_state=0, tol=1e-5)
        return SVC(kernel=kernel)
-
-
-def main():
-    svcClassify = SupportVectorMachine()
-    print('------- SVM - Classification for : WineQuality-Red -------')
-    svcClassify.classify("winequality-red.csv", encode=False, kernel='rbf')
-    svcClassify.classify("winequality-red.csv", encode=False, kernel='linear')
-    print('------- SVM - Classification for : Diabetes detection -------')
-    svcClassify.classify("diabetes_data_upload.csv", encode=True, kernel='rbf')
-    svcClassify.classify("diabetes_data_upload.csv", encode=True, kernel='linear')
-
-if __name__ == "__main__":
-    main()

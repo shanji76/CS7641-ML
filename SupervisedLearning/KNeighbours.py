@@ -3,12 +3,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from Utility import extractData
+from Utility import extractData, plotPerformance
 
 
 class KNNClassifier:
 
-   def classify(self, data_file, encode, k):
+   def classify(self, data_file, encode, k, label):
         X, Y = extractData(data_file)
 
         enc = LabelEncoder()
@@ -28,18 +28,9 @@ class KNNClassifier:
 
         classifier = KNeighborsClassifier(n_neighbors=k)
         classify_model =  classifier.fit(train_x, train_y)
+        pred_y = classify_model.predict(test_x)
         accuracy = classify_model.score(test_x, test_y) * 100
 
         print('Accuracy of KNN(k={}) = {:.2f}%'.format(k,accuracy))
+        plotPerformance(test_y, pred_y, label, 'Algorithm: k-Nearest Neighbors(k={})'.format(k))
 
-def main():
-    knnClassify = KNNClassifier()
-    print('------- KNN - Classification for : WineQuality-Red -------')
-    knnClassify.classify("winequality-red.csv", encode=False, k=6)
-    knnClassify.classify("winequality-red.csv", encode=False, k=10)
-    print('------- KNN - Classification for : Diabetes detection -------')
-    knnClassify.classify("diabetes_data_upload.csv", encode=True, k=6)
-    knnClassify.classify("diabetes_data_upload.csv", encode=True, k=7)
-
-if __name__ == "__main__":
-    main()
