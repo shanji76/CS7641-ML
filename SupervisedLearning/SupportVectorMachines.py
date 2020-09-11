@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from Utility import extractData, plotPerformance
+from Utility import extractData, plotPerformance, plotValidationCurve, plotLearningCurve, getBestModel
 
 
 class SupportVectorMachine:
@@ -23,9 +23,12 @@ class SupportVectorMachine:
 
         #
         train_x, test_x, train_y,test_y = train_test_split(X,Y, test_size=0.3, random_state=123)
-
-
-        classifier = self.getSVCForKernel(kernel)
+        parameter_grid = { 'gamma': [1e-3, 1e-4],
+                           'C': [1, 10] }
+        svc = SVC(random_state=0, kernel=kernel)
+        classifier, grid_search = getBestModel(svc, parameter_grid, train_x, train_y)
+        plotValidationCurve("SVC(kernel="+kernel+")", label, grid_search, train_x, train_y, parameter_grid)
+        plotLearningCurve("SVC(kernel="+kernel+")", label, classifier, X, Y)
         classify_model =  classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
         accuracy = classify_model.score(test_x, test_y) * 100
@@ -34,7 +37,19 @@ class SupportVectorMachine:
 
         plotPerformance(test_y, pred_y, label, 'Algorithm: Support Vector Machines(kernel={})'.format(kernel))
 
-   def getSVCForKernel(self, kernel):
-       if kernel == 'linear':
-           return LinearSVC(random_state=0, tol=1e-5)
-       return SVC(kernel=kernel)
+def main():
+    svcClassify = SupportVectorMachine()
+    print('------- SVM - Classification for : WineQuality-Red -------')
+    svcClassify.classify("winequality-red.csv", encode=False, kernel='rbf', label='Wine Quality')
+    svcClassify.classify("winequality-red.csv", encode=False, kernel='linear', label='Wine Quality')
+    print('------- SVM - Classification for : CC Default -------')
+    svcClassify.classify("default_of_credit_card_clients.csv", encode=False, kernel='rbf',
+                         label='Creditcard Default')
+    svcClassify.classify("default_of_credit_card_clients.csv", encode=False, kernel='linear',
+                         label='Creditcard Default')
+
+
+if __name__ == "__main__":
+    main()
+
+
