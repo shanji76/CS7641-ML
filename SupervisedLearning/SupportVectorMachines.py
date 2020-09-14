@@ -1,7 +1,7 @@
 from sklearn.svm import SVC, LinearSVC
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 from Utility import extractData, plotPerformance, plotValidationCurve, plotLearningCurve, getBestModel
 
@@ -23,9 +23,7 @@ class SupportVectorMachine:
 
         #
         train_x, test_x, train_y,test_y = train_test_split(X,Y, test_size=0.3, random_state=123)
-        parameter_grid = { 'gamma': [1e-3, 1e-4],
-                           'C': [1, 10] }
-        svc = SVC(random_state=0, kernel=kernel)
+        svc, parameter_grid = self.getSVCForKernel(kernel)
         classifier, grid_search = getBestModel(svc, parameter_grid, train_x, train_y)
         plotValidationCurve("SVC(kernel="+kernel+")", label, grid_search, train_x, train_y, parameter_grid)
         plotLearningCurve("SVC(kernel="+kernel+")", label, classifier, X, Y)
@@ -37,11 +35,18 @@ class SupportVectorMachine:
 
         plotPerformance(test_y, pred_y, label, 'Algorithm: Support Vector Machines(kernel={})'.format(kernel))
 
+   def getSVCForKernel(self, kernel):
+       if kernel == 'linear':
+           parameter_grid = {},
+           return LinearSVC(random_state=0), parameter_grid
+       parameter_grid = {'gamma': [1e-3, 1e-4]}
+       return SVC(kernel=kernel, random_state=0), parameter_grid
+
 def main():
     svcClassify = SupportVectorMachine()
-    print('------- SVM - Classification for : WineQuality-Red -------')
-    svcClassify.classify("winequality-red.csv", encode=False, kernel='rbf', label='Wine Quality')
-    svcClassify.classify("winequality-red.csv", encode=False, kernel='linear', label='Wine Quality')
+    # print('------- SVM - Classification for : WineQuality-Red -------')
+    # svcClassify.classify("winequality-red.csv", encode=False, kernel='rbf', label='Wine Quality')
+    # svcClassify.classify("winequality-red.csv", encode=False, kernel='linear', label='Wine Quality')
     print('------- SVM - Classification for : CC Default -------')
     svcClassify.classify("default_of_credit_card_clients.csv", encode=False, kernel='rbf',
                          label='Creditcard Default')

@@ -54,17 +54,20 @@ def plotLearningCurve(estimator, data,  model,   X, Y):
     plt.show()
 
 def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
-    # train_scores, test_scores = validation_curve(model, X, Y, param_name=param_name, param_range=param_values, cv=10)
-    # train_scores_mean = np.mean(train_scores,1)
-    # test_scores_mean = np.mean(test_scores, 1)
     df = pd.DataFrame(grid_search.cv_results_)
     results = ['mean_test_score',
                'mean_train_score',
                'std_test_score',
                'std_train_score']
-    fig, axes = plt.subplots(1, len(param_grid),
+    fig, ax = plt.subplots(1, len(param_grid),
                              figsize=(5 * len(param_grid), 7),
                              sharey='row')
+    axes = []
+    if len(param_grid) == 1:
+        axes.append(ax)
+    else:
+        axes = ax
+
     axes[0].set_ylabel("Score", fontsize=25)
     for idx, (param_name, param_range) in enumerate(param_grid.items()):
         grouped_df = df.groupby(f'param_{param_name}')[results] \
@@ -107,8 +110,7 @@ def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
     # plt.show()
 
 def getBestModel(classifyAlgorithm, parameter_grid, train_x, train_y):
-       cross_validation = StratifiedKFold(random_state=112, shuffle=True)
-       grid_search = GridSearchCV(classifyAlgorithm, param_grid=parameter_grid, cv=cross_validation, return_train_score=True)
+       grid_search = GridSearchCV(classifyAlgorithm, param_grid=parameter_grid, cv=5, return_train_score=True, n_jobs=-1,  verbose=5)
        grid_search.fit(train_x, train_y)
        print('Best params : {}'.format(grid_search.best_params_))
        classifier = grid_search.best_estimator_
