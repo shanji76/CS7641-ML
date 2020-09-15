@@ -3,12 +3,12 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from Utility import extractData, plotPerformance
+from Utility import extractData, plotPerformance, getBestModel, plotValidationCurve, plotLearningCurve
 
 
 class KNNClassifier:
 
-   def classify(self, data_file, encode, k, label):
+   def classify(self, data_file, encode, label):
         X, Y = extractData(data_file)
 
         enc = LabelEncoder()
@@ -26,11 +26,25 @@ class KNNClassifier:
         train_x, test_x, train_y,test_y = train_test_split(X,Y, test_size=0.3, random_state=123)
 
 
-        classifier = KNeighborsClassifier(n_neighbors=k)
+        knn = KNeighborsClassifier()
+        parameter_grid = {'n_neighbors': range(1, 10)}
+        classifier, grid_search = getBestModel(knn, parameter_grid, train_x, train_y)
+        plotValidationCurve("KNeighbours", label, grid_search, train_x, train_y, parameter_grid)
+        plotLearningCurve("KNeighbours", label, classifier, X, Y)
         classify_model =  classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
         accuracy = classify_model.score(test_x, test_y) * 100
 
-        print('Accuracy of KNN(k={}) = {:.2f}%'.format(k,accuracy))
-        plotPerformance(test_y, pred_y, label, 'Algorithm: k-Nearest Neighbors(k={})'.format(k))
+        print('Accuracy of KNN = {:.2f}%'.format(accuracy))
+        plotPerformance(test_y, pred_y, label, 'Algorithm: k-Nearest Neighbors')
 
+def main():
+    knnClassify = KNNClassifier()
+    print('------- KNN - Classification for : WineQuality-Red -------')
+    knnClassify.classify("winequality-red.csv", encode=False, label='Wine Quality')
+    print('------- KNN - Classification for : CC Default -------')
+    knnClassify.classify("default_of_credit_card_clients.csv", encode=False, label='Creditcard Default')
+
+
+if __name__ == "__main__":
+    main()
