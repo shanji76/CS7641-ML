@@ -2,7 +2,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import LabelEncoder
-
+from timeit import default_timer as timer
 from Utility import extractData, plotPerformance, getBestModel, plotValidationCurve, plotLearningCurve
 
 
@@ -31,14 +31,17 @@ class NeuralNetwork:
                                 (5,),(10,),(15,),(20,)
                             ]
                           }
+        start = timer()
         classifier, grid_search = getBestModel(nn, parameter_grid, train_x, train_y)
-        plotValidationCurve("Neural Network", label, grid_search, train_x, train_y, parameter_grid)
-        plotLearningCurve("Neural Network", label, classifier, X, Y)
         classify_model = classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
+        end = timer()
+        print('Elapsed time of train and test : ' + str(end - start))
         accuracy = metrics.accuracy_score(test_y, pred_y) * 100
 
         print('Accuracy of Neural Network = {:.2f}%'.format(accuracy))
+        plotValidationCurve("Neural Network", label, grid_search, train_x, train_y, parameter_grid)
+        plotLearningCurve("Neural Network", label, classifier, X, Y)
         plotPerformance(test_y, pred_y, label, 'Algorithm: Neural Network')
 
 def main():

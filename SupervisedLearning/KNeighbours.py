@@ -2,7 +2,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-
+from timeit import default_timer as timer
 from Utility import extractData, plotPerformance, getBestModel, plotValidationCurve, plotLearningCurve
 
 
@@ -28,14 +28,18 @@ class KNNClassifier:
 
         knn = KNeighborsClassifier()
         parameter_grid = {'n_neighbors': range(1, 10)}
+        start = timer()
         classifier, grid_search = getBestModel(knn, parameter_grid, train_x, train_y)
-        plotValidationCurve("KNeighbours", label, grid_search, train_x, train_y, parameter_grid)
-        plotLearningCurve("KNeighbours", label, classifier, X, Y)
         classify_model =  classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
         accuracy = classify_model.score(test_x, test_y) * 100
-
+        end = timer()
+        print('Elapsed time of train and test : ' + str(end - start))
         print('Accuracy of KNN = {:.2f}%'.format(accuracy))
+
+        plotValidationCurve("KNeighbours", label, grid_search, train_x, train_y, parameter_grid)
+        plotLearningCurve("KNeighbours", label, classifier, X, Y)
+
         plotPerformance(test_y, pred_y, label, 'Algorithm: k-Nearest Neighbors')
 
 def main():

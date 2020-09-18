@@ -31,11 +31,10 @@ def main():
 
     knnClassify = KNNClassifier()
     print('------- KNN - Classification for : WineQuality-Red -------')
-    knnClassify.classify("winequality-red.csv", encode=False, k=6, label='Wine Quality')
-    knnClassify.classify("winequality-red.csv", encode=False, k=10, label='Wine Quality')
+    knnClassify.classify("winequality-red.csv", encode=False, label='Wine Quality')
     print('------- KNN - Classification for : CC Default -------')
-    knnClassify.classify("default_of_credit_card_clients.csv", encode=False, k=6, label='Creditcard Default')
-    knnClassify.classify("default_of_credit_card_clients.csv", encode=False, k=7, label='Creditcard Default')
+    knnClassify.classify("default_of_credit_card_clients.csv", encode=False, label='Creditcard Default')
+
 
 if __name__ == "__main__":
     main()

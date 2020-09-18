@@ -1,3 +1,5 @@
+from timeit import default_timer as timer
+
 from sklearn import tree
 from sklearn.model_selection import train_test_split, learning_curve, validation_curve
 from sklearn.preprocessing import LabelEncoder
@@ -33,16 +35,18 @@ class DecisionTree:
                           'max_depth': range(1,10),
                           'max_features': range(1,5),
                           'min_samples_leaf': range(1,5)}
+        start = timer()
         classifier, grid_search = getBestModel(dct, parameter_grid, train_x, train_y)
-        plotValidationCurve("Decision Tree", label, grid_search, train_x, train_y, parameter_grid)
-        plotLearningCurve("Decision Tree", label, classifier, X, Y)
-
         classify_model =  classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
+        end = timer()
+        print('Elapsed time of train and test : '+ str(end - start))
         accuracy = grid_search.best_score_ * 100
 
         print('Accuracy of Decision Tree(depth={}) = {:.2f}%'.format(classify_model.get_depth(),accuracy))
 
+        plotValidationCurve("Decision Tree", label, grid_search, train_x, train_y, parameter_grid)
+        plotLearningCurve("Decision Tree", label, classifier, X, Y)
         plotPerformance(test_y, pred_y, label, 'Algorithm: Decision Tree')
 
 
@@ -66,11 +70,14 @@ class DecisionTree:
         parameter_grid = {'learning_rate': [0.2, 0.3, 0.5],
                           'max_depth': [2, 3, 4, 5]
                           }
+        start = timer()
         classifier, grid_search = getBestModel(dctb, parameter_grid, train_x, train_y)
         plotValidationCurve("Decision Tree with Boost", label, grid_search, train_x, train_y, parameter_grid)
         plotLearningCurve("Decision Tree with Boost", label, classifier, X, Y)
         classify_model = classifier.fit(X, Y)
         pred_y = classify_model.predict(test_x)
+        end = timer()
+        print('Elapsed time of train and test : ' + str(end - start))
         accuracy = classify_model.score(test_x, test_y)*100
 
         print('Accuracy of GradientBoostingClassifier = {:.2f}%'.format(accuracy))

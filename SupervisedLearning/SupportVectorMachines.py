@@ -2,7 +2,7 @@ from sklearn.svm import SVC, LinearSVC
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-
+from timeit import default_timer as timer
 from Utility import extractData, plotPerformance, plotValidationCurve, plotLearningCurve, getBestModel
 
 
@@ -27,14 +27,16 @@ class SupportVectorMachine:
         classifier = svc
         if parameter_grid is not None:
             classifier, grid_search = getBestModel(svc, parameter_grid, train_x, train_y)
-            plotValidationCurve("SVC(kernel="+kernel+")", label, grid_search, train_x, train_y, parameter_grid)
-        plotLearningCurve("SVC(kernel="+kernel+")", label, classifier, train_x, train_y)
+            plotValidationCurve("SVC(kernel=" + kernel + ")", label, grid_search, train_x, train_y, parameter_grid)
+        start = timer()
         classify_model =  classifier.fit(train_x, train_y)
         pred_y = classify_model.predict(test_x)
+        end = timer()
+        print('Elapsed time of train and test : ' + str(end - start))
         accuracy = classify_model.score(test_x, test_y) * 100
 
         print('Accuracy of SVC(kernel={}) = {:.2f}%'.format(kernel,accuracy))
-
+        plotLearningCurve("SVC(kernel=" + kernel + ")", label, classifier, train_x, train_y)
         plotPerformance(test_y, pred_y, label, 'Algorithm: Support Vector Machines(kernel={})'.format(kernel))
 
    def getSVCForKernel(self, kernel):

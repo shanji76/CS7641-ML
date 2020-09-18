@@ -110,7 +110,7 @@ def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
     # plt.show()
 
 def getBestModel(classifyAlgorithm, parameter_grid, train_x, train_y):
-       grid_search = GridSearchCV(classifyAlgorithm, param_grid=parameter_grid, cv=5, return_train_score=True, n_jobs=-1,  verbose=5)
+       grid_search = GridSearchCV(classifyAlgorithm, param_grid=parameter_grid, cv=5, return_train_score=True, n_jobs=-1)
        grid_search.fit(train_x, train_y)
        print('Best params : {}'.format(grid_search.best_params_))
        classifier = grid_search.best_estimator_
