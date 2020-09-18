@@ -12,6 +12,8 @@ def extractData(data_file):
        Y = data.iloc[:, -1].values
        return X, Y
 
+def acronym(text):
+    return ''.join(word[0] for word in text.lower().split())
 
 def plotPerformance(actual, predicted, label, title):
      conf_matrix = pd.crosstab(actual, predicted, rownames=['Actual'], colnames=['Predicted'], margins=True)
@@ -19,7 +21,7 @@ def plotPerformance(actual, predicted, label, title):
      print(conf_matrix.to_latex())
 
      y_max = max(actual)
-     plt.figure(figsize=(6, 4))
+     pf = plt.figure(figsize=(6, 5))
      plt.scatter(actual, predicted)
      plt.plot([0, y_max], [0, y_max], '--k')
      plt.axis('tight')
@@ -27,7 +29,8 @@ def plotPerformance(actual, predicted, label, title):
      plt.ylabel('Predicted {}'.format(label))
      plt.tight_layout()
      plt.title(title)
-     plt.show()
+     # plt.show()
+     pf.savefig('{}-{}-pred.png'.format(acronym(title), acronym(label)))
 
 def plotLearningCurve(estimator, data,  model,   X, Y):
     train_sizes, train_scores, validation_scores, fit_times, _ = learning_curve(model, X, Y, train_sizes=np.linspace(0.1,1,10),return_times=True)
@@ -35,7 +38,7 @@ def plotLearningCurve(estimator, data,  model,   X, Y):
     validation_scores_mean = np.mean(validation_scores, 1)
     fit_times_mean = np.mean(fit_times,1)
 
-    _, axes = plt.subplots(1, 2, figsize=(20, 10))
+    lcFig, axes = plt.subplots(1, 2, figsize=(20,10))
 
     axes[0].plot(train_sizes, train_scores_mean, label='Training score')
     axes[0].plot(train_sizes, validation_scores_mean, label='Validation score')
@@ -51,7 +54,8 @@ def plotLearningCurve(estimator, data,  model,   X, Y):
     axes[1].set_ylabel("fit_times")
     axes[1].set_title("Scalability of the model")
 
-    plt.show()
+    # plt.show()
+    lcFig.savefig('{}-{}-lc.png'.format(acronym(estimator), acronym(data)))
 
 def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
     df = pd.DataFrame(grid_search.cv_results_)
@@ -59,7 +63,7 @@ def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
                'mean_train_score',
                'std_test_score',
                'std_train_score']
-    fig, ax = plt.subplots(1, len(param_grid),
+    vcFig, ax = plt.subplots(1, len(param_grid),
                              figsize=(5 * len(param_grid), 7),
                              sharey='row')
     axes = []
@@ -87,9 +91,10 @@ def plotValidationCurve(estimator, data,  grid_search,   X, Y, param_grid):
 
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.suptitle('Validation curves', fontsize=30)
-    fig.legend(handles, labels, loc='upper right', ncol=1, fontsize=20)
-    plt.show()
+    vcFig.suptitle('Validation curves', fontsize=30)
+    vcFig.legend(handles, labels, loc='upper right', ncol=1, fontsize=20)
+    # plt.show()
+    vcFig.savefig('{}-{}-lc.png'.format(acronym(estimator), acronym(data)))
 
 
 
