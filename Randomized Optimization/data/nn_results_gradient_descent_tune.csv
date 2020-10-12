@@ -1,0 +1,2 @@
+algorithm,restarts,pop_size,mutation_prob,max_iters,learning_rate,layers,activation,early_stopping,train_error,test_error,time_elapsed,iterations,fitness
+gradient_descent,0,200,0.1,500,0.0005,[15],relu,False,0.7825714285714286,0.77,25.94619369506836,500,-0.7878427744705465
