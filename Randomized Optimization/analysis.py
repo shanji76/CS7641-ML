@@ -53,6 +53,17 @@ class Analysis :
         plt.legend()
         plt.savefig("plots/nn_comp_iter.png")
 
+        plt.figure()
+        plt.plot(rhc_results["iterations"], rhc_results["test_error"], label="RHC")
+        plt.plot(sa_results["iterations"], sa_results["test_error"], label="SA")
+        plt.plot(ga_results["iterations"], ga_results["test_error"], label="GA")
+        plt.xlabel("Iterations")
+        plt.ylabel("Best Fitness")
+        plt.title("Test Accuracy")
+        plt.legend()
+        plt.savefig("plots/nn_comp_acc.png")
+
+
 def main():
     analysis = Analysis()
     analysis.compare('rhc','Random Hill Climbing')
