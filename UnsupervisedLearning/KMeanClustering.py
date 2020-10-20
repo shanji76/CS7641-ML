@@ -2,8 +2,7 @@ from sklearn.cluster import KMeans
 from Utility import extractData
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
-import pandas as pd
-from pandas import plotting
+import matplotlib.cm as cm
 
 class KMeanClustering:
 
@@ -22,12 +21,12 @@ class KMeanClustering:
         plt.ylabel('Inertia')
         plt.show()
 
-        km = KMeans(n_clusters=4)
+        km = KMeans(n_clusters=4,random_state=123)
         km_val = km.fit(x)
         x['cluster'] = km.predict(x)
-        plotting.parallel_coordinates(x,'cluster')
+        plt.scatter(x.iloc[:,0],y,c=km.labels_, cmap="jet")
+        plt.legend()
         plt.show()
-
 
 
 def main():
