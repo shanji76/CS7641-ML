@@ -2,7 +2,7 @@ from sklearn.cluster import KMeans
 from Utility import extractData
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
+import numpy as np
 
 class KMeanClustering:
 
@@ -19,14 +19,27 @@ class KMeanClustering:
         plt.plot(range(1,10), inertia, 'bx-')
         plt.xlabel('k')
         plt.ylabel('Inertia')
-        plt.show()
+        plt.savefig('image/kmeans_clusters.png')
 
-        km = KMeans(n_clusters=4,random_state=123)
+        k = 4
+        km = KMeans(n_clusters=k,random_state=123)
         km_val = km.fit(x)
         x['cluster'] = km.predict(x)
-        plt.scatter(x.iloc[:,0],y,c=km.labels_, cmap="jet")
-        plt.legend()
-        plt.show()
+
+
+        cmap = plt.cm.get_cmap('viridis_r')
+        ci = 1
+        for c in x.columns:
+            f, ax = plt.subplots()
+            if c == 'cluster' or c =='alcohol':
+                break
+            for i, cluster in x.groupby('cluster'):
+                _ = ax.scatter(cluster[c], cluster['alcohol'], c=np.array([cmap(i / k)]), label=i)
+            ax.legend()
+            plt.xlabel(c)
+            plt.ylabel('alcohol')
+            plt.savefig('image/kmeans_'+str(ci)+'.png')
+            ci = ci+1
 
 
 def main():
