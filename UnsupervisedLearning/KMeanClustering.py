@@ -4,6 +4,8 @@ from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.mixture import GaussianMixture
+from sklearn.metrics import accuracy_score
+from collections import Counter
 
 class KMeanClustering:
 
@@ -73,7 +75,14 @@ class KMeanClustering:
             plt.savefig('image/em_cluster_' + str(ci) + '.png')
             ci = ci + 1
 
+    def cluster_accuracy(self, original, cluster_label):
 
+        prediction = np.empty_like(original)
+        for cl in set(cluster_label):
+            mask = cluster_label == cl
+            target = Counter(original[mask]).most_common(1)[0][0]
+            prediction[mask] = target
+        return accuracy_score(original, cluster_label)
 def main():
     kmeans = KMeanClustering()
     kmeans.cluster("data/winequality-red.csv")
