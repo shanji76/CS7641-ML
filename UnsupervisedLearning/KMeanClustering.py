@@ -12,19 +12,24 @@ class KMeanClustering:
     def cluster(self, data_file):
         x,y = extractData(data_file)
         inertia = []
-        for k in range(1,10) :
+        kmeans_accuracy = {}
+        k_range = [1,2,5,10,15]
+        for k in k_range :
             km = KMeans(n_clusters=k,
                              n_init=10,
                              random_state=123)
             km.fit(x)
             inertia.append(km.inertia_)
+            kmeans_accuracy[k]=self.cluster_accuracy(y,km.predict(x))
 
-        plt.plot(range(1,10), inertia, 'bx-')
+        plt.plot(k_range, inertia, 'bx-')
         plt.xlabel('k')
         plt.ylabel('Inertia')
         plt.savefig('image/kmeans_clusters.png')
 
-        k = 4
+        self.plot_score_curve(kmeans_accuracy,"kmeans_accuracy")
+
+        k = 5
         km = KMeans(n_clusters=k,random_state=123)
         km_val = km.fit(x)
         x['cluster'] = km.predict(x)
@@ -41,6 +46,7 @@ class KMeanClustering:
             plt.xlabel(c)
             plt.ylabel('alcohol')
             plt.savefig('image/kmeans_'+str(ci)+'.png')
+            plt.close()
             ci = ci+1
 
         bic = []
@@ -58,6 +64,7 @@ class KMeanClustering:
         plt.xlabel('n_components')
         plt.ylabel('BIC')
         plt.savefig('image/em_cluster_comp.png')
+        plt.close()
 
         em_cluster = best_em.fit_predict(x.iloc[:,:-1])
         x['em_cluster'] = em_cluster
@@ -82,7 +89,27 @@ class KMeanClustering:
             mask = cluster_label == cl
             target = Counter(original[mask]).most_common(1)[0][0]
             prediction[mask] = target
-        return accuracy_score(original, cluster_label)
+        return accuracy_score(original, prediction)
+
+    def plot_score_curve(self, data, title):
+
+        fig = plt.figure()
+
+        num_clusters = list(data.keys())
+        score_clusters = list(data.values())
+
+        ax = fig.add_subplot(111, xlabel='# Clusters', ylabel='Score', title=title)
+
+        ax.plot(num_clusters, score_clusters, 'o-', color="b",
+                label="Num of Clusters")
+        ax.set_xticks(num_clusters)
+
+        ax.legend(loc="best")
+        fig.savefig("image/" + title + ".png")  # save the figure to file
+        plt.close(fig)
+        return plt
+
+
 def main():
     kmeans = KMeanClustering()
     kmeans.cluster("data/winequality-red.csv")
