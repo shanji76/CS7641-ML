@@ -8,6 +8,7 @@ from sklearn.mixture import GaussianMixture
 from sklearn.metrics import accuracy_score
 from collections import Counter
 import pandas as pd
+from sys import exit
 
 class Clustering:
 
@@ -141,3 +142,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    exit()
