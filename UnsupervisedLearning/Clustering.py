@@ -1,14 +1,15 @@
-from sklearn.cluster import KMeans
-from Utility import extractData
-from sklearn.metrics import accuracy_score
+from sys import exit
+
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn import preprocessing
-from sklearn.mixture import GaussianMixture
-from sklearn.metrics import accuracy_score
-from collections import Counter
 import pandas as pd
-from sys import exit
+from sklearn import preprocessing
+from sklearn.cluster import KMeans
+from sklearn.metrics import homogeneity_score, v_measure_score
+from sklearn.mixture import GaussianMixture
+
+from Utility import extractData
+
 
 class Clustering:
 
@@ -16,9 +17,12 @@ class Clustering:
         inertia = []
         kmeans_accuracy = {}
         k_range = [1,2,5,10,15]
+
         for k in k_range :
             km = KMeans(n_clusters=k,
-                             n_init=10,
+                        init='random',
+                        n_init=10, max_iter=300,
+                        tol=1e-04,
                              random_state=123)
             km.fit(x)
             inertia.append(km.inertia_)
@@ -30,6 +34,12 @@ class Clustering:
         plt.savefig('image/'+dataTitle+'/kmeans_clusters.png')
         plt.close()
         self.plot_score_curve(kmeans_accuracy,"kmeans_accuracy_"+dataTitle)
+
+        print('K-means : clusters accuracy')
+        km_data = [(k_range),(kmeans_accuracy.values())]
+        accuracy_tab = pd.DataFrame(km_data)
+        print(accuracy_tab)
+        print(accuracy_tab.to_latex())
 
 
     def kmeansFitBestModel(self, col1, col2, dataTitle, x, k):
@@ -88,13 +98,7 @@ class Clustering:
         ci = ci + 1
 
     def cluster_accuracy(self, original, cluster_label):
-
-        prediction = np.empty_like(original)
-        for cl in set(cluster_label):
-            mask = cluster_label == cl
-            target = Counter(original[mask]).most_common(1)[0][0]
-            prediction[mask] = target
-        return accuracy_score(original, prediction)
+        return v_measure_score(original,cluster_label, 0.01)
 
     def plot_score_curve(self, data, title):
 
@@ -118,6 +122,7 @@ def main():
     cluster = Clustering()
     data_file = "data/winequality-red.csv"
     x, y = extractData(data_file)
+    x = pd.DataFrame(preprocessing.scale(x), columns=x.columns)
     cluster.kMeansCluster('wine',x,y,6,10)
     cluster.kmeansFitBestModel(6, 10, 'wine', x, 5)
 
