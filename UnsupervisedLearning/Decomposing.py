@@ -151,7 +151,7 @@ class Decomposing:
                             ('clf', SVC(kernel='linear', random_state=1))])
 
        param_grid = [{'sel__k': range(2,dim_max,2),
-                      'clf__C': [0.1, 1, 10, 100],
+                      'clf__C': [0.1],
                       'clf__kernel': ['linear']}]
        grid_search = GridSearchCV(pipeline,
                                   param_grid=param_grid,
