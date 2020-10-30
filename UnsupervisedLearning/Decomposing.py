@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA, FastICA, truncated_svd
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
-from sklearn.random_projection import GaussianRandomProjection
+from sklearn.random_projection import SparseRandomProjection
 from sklearn.svm import SVC
 
 from Utility import extractData
@@ -13,6 +13,8 @@ from sys import exit
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import SelectKBest, chi2, mutual_info_classif
+import scipy.sparse as sps
+from scipy.linalg import pinv
 
 class Decomposing:
 
@@ -22,7 +24,7 @@ class Decomposing:
         for n in range(1,dim_max):
             pca = PCA(n_components=n, random_state=123)
             pca_result = pca.fit_transform(x,y)
-            exp_vars.append(sum(pca.explained_variance_))
+            exp_vars.append(sum(pca.explained_variance_ratio_))
 
         plt.figure()
         plt.plot(range(1,dim_max), exp_vars, 'bx-')
@@ -31,7 +33,7 @@ class Decomposing:
         plt.savefig('image/' + title + '/pca_train.png')
         plt.close()
 
-    def pca_eval(self, x,y,title,n):
+    def pca_eval(self, x,y,title,n,class_title):
         pca = PCA(n_components=n, random_state=123)
         pca_result = pca.fit_transform(x)
         cols = []
@@ -47,7 +49,7 @@ class Decomposing:
         for i, c, label in zip(classes, 'rgbcmykw', labels):
             plt.scatter(pca_result[y == i, 0], pca_result[y == i, 1],
                         c=c, label=label)
-        ax.legend()
+        ax.legend(title=class_title)
         plt.xlabel('PC1')
         plt.ylabel('PC2')
         plt.savefig('image/' + title + '/pca.png')
@@ -69,7 +71,7 @@ class Decomposing:
         plt.savefig('image/' + title + '/ica_train.png')
         plt.close()
 
-    def ica_eval(self, x,y,title,n):
+    def ica_eval(self, x,y,title,n,class_title):
         ica = FastICA(n_components=n, random_state=123, tol=0.1)
         ica_result = ica.fit_transform(x)
         cols = []
@@ -85,7 +87,7 @@ class Decomposing:
         for i, c, label in zip(classes, 'rgbcmykw', labels):
             plt.scatter(ica_result[y == i, 0], ica_result[y == i, 1],
                         c=c, label=label)
-        ax.legend()
+        ax.legend(title=class_title)
         plt.xlabel('PC1')
         plt.ylabel('PC2')
         plt.savefig('image/' + title + '/ica.png')
@@ -100,11 +102,9 @@ class Decomposing:
         components_min_error = None
         min_error = float("inf")
         for n in range(2,dim_max+1):
-            rp = GaussianRandomProjection(n_components=n, random_state=123)
+            rp = SparseRandomProjection(n_components=n, random_state=123)
             rp_result = rp.fit_transform(x)
-            inv = np.linalg.pinv(rp.components_)
-            reconstructed_data = scaler.inverse_transform(np.dot(rp_result, inv.T))
-            reconstruction_error = np.nanmean(np.square(x.values - reconstructed_data))
+            reconstruction_error = self.reconstructionError(rp,x)
             rp_error.append(reconstruction_error)
 
             if reconstruction_error < min_error:
@@ -121,8 +121,8 @@ class Decomposing:
 
         return n_min_reconstruction_error
 
-    def rp_eval(self, x,y,title,n):
-        rp = GaussianRandomProjection(n_components=n, random_state=123)
+    def rp_eval(self, x,y,title,n,class_title):
+        rp = SparseRandomProjection(n_components=n, random_state=123)
         rp_result = rp.fit_transform(x)
         cols = []
         for c in range(1,n+1):
@@ -137,7 +137,7 @@ class Decomposing:
         for i, c, label in zip(classes, 'rgbcmykw', labels):
             plt.scatter(rp_result[y == i, 0], rp_result[y == i, 1],
                         c=c, label=label)
-        ax.legend()
+        ax.legend(title=class_title)
         plt.xlabel('PC1')
         plt.ylabel('PC2')
         plt.savefig('image/' + title + '/rp.png')
@@ -160,25 +160,61 @@ class Decomposing:
                                   n_jobs=5)
        grid_search.fit(x, y)
        optimal_k = grid_search.best_estimator_.named_steps['sel'].k
-       return optimal_k
+       print('Select K Best - optimal k : {}'.format(str(optimal_k)))
 
+       sk = SelectKBest(k=optimal_k)
+       sk.fit(x,y)
+       # Get the raw p-values for each feature, and transform from p-values into scores
+       scores = -np.log10(sk.pvalues_)
+       features = x.columns[sk.get_support()]
+       # Plot the scores.  See how "Pclass", "Sex", "Title", and "Fare" are the best?
+       plt.figure()
+       plt.bar(range(len(x.columns)), scores)
+       plt.xticks(range(len(x.columns)), range(len(x.columns)), rotation=60)
+       plt.xlabel('Features')
+       plt.ylabel('Score')
+       plt.savefig('image/' + title + '/sk.png')
 
+    def reconstructionError(self, projections, X):
+        W = projections.components_
+        if sps.issparse(W):
+            W = W.todense()
+        p = pinv(W)
+        reconstructed = ((p @ W) @ (X.T)).T  # Unproject projected data
+        errors = np.square(X.values - reconstructed)
+        return np.nanmean(errors)
 
 def main():
     data_file = "data/winequality-red.csv"
     x, y = extractData(data_file)
     decompose = Decomposing()
     decompose.pca_dim_reduction(x,y,'wine',11)
-    decompose.pca_eval(x,y,'wine',4)
+    decompose.pca_eval(x,y,'wine',5,'Rating')
 
     decompose.ica_dim_reduction(x,y,'wine',11)
-    decompose.ica_eval(x, y, 'wine', 11)
+    decompose.ica_eval(x, y, 'wine', 11,'Rating')
 
     n = decompose.rp_dim_reduction(x, y, 'wine', 11)
-    decompose.rp_eval(x, y, 'wine', n)
+    print('Optimal n for RP(Wine data set) : {} '.format(str(n)))
+    decompose.rp_eval(x, y, 'wine', n,'Rating')
 
     k = decompose.sk_dim_reduction(x, y, 'wine', 11)
     # decompose.sk_eval(x, y, 'wine', k)
+
+    data_file = "data/default_of_credit_card_clients.csv"
+    x, y = extractData(data_file)
+    decompose = Decomposing()
+    decompose.pca_dim_reduction(x, y, 'default', 24)
+    decompose.pca_eval(x, y, 'default', 10,'Defaulted')
+
+    decompose.ica_dim_reduction(x, y, 'default', 24)
+    decompose.ica_eval(x, y, 'default', 6, 'Defaulted')
+
+    n = decompose.rp_dim_reduction(x, y, 'default', 24)
+    print('Optimal n for RP(CC Default data set) : {} '.format(str(n)))
+    decompose.rp_eval(x, y, 'default', n, 'Defaulted')
+
+    k = decompose.sk_dim_reduction(x, y, 'default', 24)
 
 if __name__ == "__main__":
     main()

@@ -66,6 +66,7 @@ class Clustering:
         k_range = [1, 2, 5, 10, 15]
         lowest_bic = np.infty
         best_em = None
+        em_accuracy=[]
         for k in k_range:
             em = GaussianMixture(n_components=k, random_state=123)
             em.fit(x.iloc[:, :-1])
@@ -73,12 +74,19 @@ class Clustering:
             if bic[-1] < lowest_bic:
                 lowest_bic = bic[-1]
                 best_em = em
+            em_accuracy.append(self.cluster_accuracy(y, em.predict(x.iloc[:, :-1])))
         plt.figure()
         plt.plot(k_range, bic, 'bx-')
         plt.xlabel('n_components')
         plt.ylabel('BIC')
         plt.savefig('image/'+dataTitle+'/em_cluster_comp.png')
         plt.close()
+
+        print('EM : clusters accuracy')
+        em_data = [(k_range), (em_accuracy)]
+        accuracy_tab = pd.DataFrame(em_data)
+        print(accuracy_tab)
+        print(accuracy_tab.to_latex())
 
 
     def emFitBestModel(self, c1, c2, dataTitle, k, x):
@@ -98,7 +106,7 @@ class Clustering:
         ci = ci + 1
 
     def cluster_accuracy(self, original, cluster_label):
-        return v_measure_score(original,cluster_label, 0.01)
+        return v_measure_score(original,cluster_label, beta=0.01)
 
     def plot_score_curve(self, data, title):
 
@@ -142,7 +150,7 @@ def main():
     cluster.kmeansFitBestModel(num_cols, num_cols+1, 'default', x,10)
 
     cluster.emCluster('default', x, y, num_cols, num_cols+1)
-    cluster.emFitBestModel(num_cols, num_cols+1, 'default', 5, x)
+    cluster.emFitBestModel(num_cols, num_cols+1, 'default', 15, x)
 
 
 if __name__ == "__main__":
