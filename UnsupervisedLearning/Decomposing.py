@@ -55,6 +55,8 @@ class Decomposing:
         plt.savefig('image/' + title + '/pca.png')
         plt.close()
 
+        return pca_result
+
 
     def ica_dim_reduction(self, x,y, title, dim_max):
         print('ICA')
@@ -92,6 +94,8 @@ class Decomposing:
         plt.ylabel('PC2')
         plt.savefig('image/' + title + '/ica.png')
         plt.close()
+
+        return ica_result
 
     def rp_dim_reduction(self, x,y, title, dim_max):
         print('Random Projections')
@@ -143,6 +147,8 @@ class Decomposing:
         plt.savefig('image/' + title + '/rp.png')
         plt.close()
 
+        return rp_result
+
 
     def sk_dim_reduction(self, x,y, title, dim_max):
        print('Select K Best')
@@ -163,7 +169,7 @@ class Decomposing:
        print('Select K Best - optimal k : {}'.format(str(optimal_k)))
 
        sk = SelectKBest(k=optimal_k)
-       sk.fit(x,y)
+       sk_result = sk.fit(x,y)
        # Get the raw p-values for each feature, and transform from p-values into scores
        scores = -np.log10(sk.pvalues_)
        features = x.columns[sk.get_support()]
@@ -174,6 +180,14 @@ class Decomposing:
        plt.xlabel('Features')
        plt.ylabel('Score')
        plt.savefig('image/' + title + '/sk.png')
+
+       return sk_result
+
+    def sk_eval(self, x, y, k):
+        sk = SelectKBest(k=k)
+        sk_result = sk.fit_transform(x, y)
+
+        return sk_result
 
     def reconstructionError(self, projections, X):
         W = projections.components_

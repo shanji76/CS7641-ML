@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 from sklearn import preprocessing
 from sklearn.cluster import KMeans
-from sklearn.metrics import homogeneity_score, v_measure_score
+from sklearn.metrics import homogeneity_score, v_measure_score, adjusted_mutual_info_score
 from sklearn.mixture import GaussianMixture
-
 from Utility import extractData
 
 
@@ -43,6 +42,7 @@ class Clustering:
 
 
     def kmeansFitBestModel(self, col1, col2, dataTitle, x, k):
+        x = x.copy()
         km = KMeans(n_clusters=k, random_state=123)
         km_val = km.fit(x)
         x['cluster'] = km.predict(x)
@@ -60,8 +60,10 @@ class Clustering:
         plt.close()
         ci = ci + 1
 
-    def emCluster(self,dataTitle, x, y, c1, c2):
+        return km
 
+    def emCluster(self,dataTitle, x, y, c1, c2):
+        x = x.copy()
         bic = []
         k_range = [1, 2, 5, 10, 15]
         lowest_bic = np.infty
@@ -69,12 +71,12 @@ class Clustering:
         em_accuracy=[]
         for k in k_range:
             em = GaussianMixture(n_components=k, random_state=123)
-            em.fit(x.iloc[:, :-1])
-            bic.append(em.bic(x.iloc[:, :-1]))
+            em.fit(x)
+            bic.append(em.bic(x))
             if bic[-1] < lowest_bic:
                 lowest_bic = bic[-1]
                 best_em = em
-            em_accuracy.append(self.cluster_accuracy(y, em.predict(x.iloc[:, :-1])))
+            em_accuracy.append(self.cluster_accuracy(y, em.predict(x)))
         plt.figure()
         plt.plot(k_range, bic, 'bx-')
         plt.xlabel('n_components')
@@ -90,8 +92,10 @@ class Clustering:
 
 
     def emFitBestModel(self, c1, c2, dataTitle, k, x):
+        x = x.copy()
         cmap = plt.cm.get_cmap('viridis_r')
-        em_cluster = GaussianMixture(n_components=k, random_state=123).fit_predict(x.iloc[:, :-1])
+        em = GaussianMixture(n_components=k, random_state=123)
+        em_cluster = em.fit_predict(x)
         x['em_cluster'] = em_cluster
         ci = 1
         c = x.columns.tolist()[c1]
@@ -104,6 +108,8 @@ class Clustering:
         plt.ylabel(c2)
         plt.savefig('image/' + dataTitle + '/em_cluster_' + str(ci) + '.png')
         ci = ci + 1
+
+        return em
 
     def cluster_accuracy(self, original, cluster_label):
         return v_measure_score(original,cluster_label, beta=0.01)
