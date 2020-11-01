@@ -55,7 +55,7 @@ class Decomposing:
         plt.savefig('image/' + title + '/pca.png')
         plt.close()
 
-        return pca_result
+        return pca_result, pca
 
 
     def ica_dim_reduction(self, x,y, title, dim_max):
@@ -95,7 +95,7 @@ class Decomposing:
         plt.savefig('image/' + title + '/ica.png')
         plt.close()
 
-        return ica_result
+        return ica_result, ica
 
     def rp_dim_reduction(self, x,y, title, dim_max):
         print('Random Projections')
@@ -147,7 +147,7 @@ class Decomposing:
         plt.savefig('image/' + title + '/rp.png')
         plt.close()
 
-        return rp_result
+        return rp_result, rp
 
 
     def sk_dim_reduction(self, x,y, title, dim_max):
@@ -187,7 +187,7 @@ class Decomposing:
         sk = SelectKBest(k=k)
         sk_result = sk.fit_transform(x, y)
 
-        return sk_result
+        return sk_result, sk
 
     def reconstructionError(self, projections, X):
         W = projections.components_
