@@ -133,15 +133,21 @@ class Clustering:
 
 
 def main():
+    results = pd.DataFrame(
+        columns=['Data Set', 'Cluster Algo.', '# Clusters', 'Mutual Info Score'])
     cluster = Clustering()
     data_file = "data/winequality-red.csv"
     x, y = extractData(data_file)
     x = pd.DataFrame(preprocessing.scale(x), columns=x.columns)
     cluster.kMeansCluster('wine',x,y,6,10)
-    cluster.kmeansFitBestModel(6, 10, 'wine', x, 5)
+    km = cluster.kmeansFitBestModel(6, 10, 'wine', x, 5)
+    score = adjusted_mutual_info_score(km.labels_, y)
+    results = append_results(results, ['Wine Quality', 'k-Means', 5, score])
 
     cluster.emCluster('wine',x,y,6,10)
-    cluster.emFitBestModel(6, 10, 'wine', 5, x)
+    em = cluster.emFitBestModel(6, 10, 'wine', 5, x)
+    score = adjusted_mutual_info_score(em.predict(x), y)
+    results = append_results(results, ['Wine Quality', 'Exp. Maximization', 5, score])
 
     data_file = "data/default_of_credit_card_clients.csv"
     x, y = extractData(data_file)
@@ -153,11 +159,23 @@ def main():
     x['total_pmt'] = x.loc[:, pmt_cols].sum(axis=1)
 
     cluster.kMeansCluster('default', x, y, num_cols, num_cols+1)
-    cluster.kmeansFitBestModel(num_cols, num_cols+1, 'default', x,10)
+    km = cluster.kmeansFitBestModel(num_cols, num_cols+1, 'default', x,10)
+    score = adjusted_mutual_info_score(km.labels_, y)
+    results = append_results(results, ['CC Default', 'k-Means', 10, score])
 
     cluster.emCluster('default', x, y, num_cols, num_cols+1)
-    cluster.emFitBestModel(num_cols, num_cols+1, 'default', 15, x)
+    em = cluster.emFitBestModel(num_cols, num_cols+1, 'default', 15, x)
+    score = adjusted_mutual_info_score(em.predict(x), y)
+    results = append_results(results, ['CC Default', 'Exp. Maximization', 15, score])
 
+    print(results)
+    print(results.to_latex())
+
+def append_results(exp_results, results):
+    return exp_results.append(
+        {'Data Set': results[0], 'Cluster Algo.': results[1], '# Clusters': results[2],
+         'Mutual Info Score': results[3]},
+        ignore_index=True)
 
 if __name__ == "__main__":
     main()

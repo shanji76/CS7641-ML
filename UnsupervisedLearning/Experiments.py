@@ -40,10 +40,10 @@ def main():
     cluster = Clustering()
 
     pca_result = pd.DataFrame(dimreduce.pca_eval(x,y,'experiment/wine/pca',5,'Rating')[0])
-    km = cluster.kmeansFitBestModel(1, 2, 'experiment/wine/pca', pca_result.copy(), 4)
+    km = cluster.kmeansFitBestModel(1, 2, 'experiment/wine/pca', pca_result.copy(), 5)
     score = adjusted_mutual_info_score(km.labels_,y)
     print('Wine : PCA - Kmeans : Score = {}'.format(score))
-    exp_results = append_results(exp_results, ['Wine Quality','PCA','k-Means',4,score])
+    exp_results = append_results(exp_results, ['Wine Quality','PCA','k-Means',5,score])
     em = cluster.emFitBestModel(1,2,'experiment/wine/pca',5,pca_result)
     score = adjusted_mutual_info_score(em.predict(pca_result), y)
     print('Wine : PCA - EM : Score = {}'.format(score))
