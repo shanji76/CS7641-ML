@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 import sys
 from gym.envs.toy_text.frozen_lake import generate_random_map
 
-random_map = generate_random_map(size=20, p=0.8)
-
 class FrozenLake():
     def __init__(self, size=10, p=0.8):
         self.name='frozenlake'
