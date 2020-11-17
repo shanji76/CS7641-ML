@@ -138,7 +138,7 @@ class FrozenLake():
                                       alpha_min=alpha_min, epsilon=epsilon,
                                       epsilon_min=epsilon_min, epsilon_decay=epsilon_decay,
                                       n_iter=n_iter)
-            row.append(results[3])  # time
+            row.append(results[3])  # timed
             row.append(np.sum(np.absolute(np.array(vi) - np.array(pi))))
             row.append(np.sum(np.absolute(results[0] - np.array(vi))))
             row.append(np.sum(np.absolute(results[0] - np.array(pi))))
@@ -160,7 +160,7 @@ class FrozenLake():
                            epsilon=epsilon, epsilon_min=epsilon_min, epsilon_decay=epsilon_decay,
                            n_iter=n_iter)
         run_stats = ql.run()
-        self.plot(run_stats, 'Frozen Lake - Q-Learning')
+        # self.plot(run_stats, 'Frozen Lake - Q-Learning')
         expected_values = ql.V
         optimal_policy = ql.policy
         time = ql.time
