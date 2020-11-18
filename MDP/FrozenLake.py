@@ -1,3 +1,4 @@
+from QLearner import QLearner
 from hiive.mdptoolbox import mdp
 import gym
 import pandas as pd
@@ -117,52 +118,7 @@ class FrozenLake():
         plot_df.plot(x='Time', y='Error', title=title)
         plt.show()
 
-    def q_learning_trials(self, trials=10, vi=None, pi=None):
-        for t in range(trials):
-            np.random.seed()  # remove seed for parameter generation
-            if self.name == 'frozenlake':
-                n_iter = np.random.randint(10000, 50000)
-                gamma = np.random.uniform(0.95, 1.0)
-                alpha = np.random.uniform(0.2, 1.0)
-                alpha_decay = 1 - np.exp(np.random.uniform(np.log(0.0001), np.log(0.001)))
-                alpha_min = np.random.uniform(0, 0.1)
-                epsilon = np.random.uniform(0.5, 1.0)
-                epsilon_decay = 1 - np.exp(np.random.uniform(np.log(0.0001), np.log(0.001)))
-                epsilon_min = np.random.uniform(0, 0.2)
-            np.random.seed(1234)  # reset seed
-            row = [t, n_iter, gamma, alpha, alpha_decay, alpha_min, epsilon, epsilon_decay,
-                   epsilon_min]
-            results = self.q_learning(gamma=gamma, alpha=alpha, alpha_decay=alpha_decay,
-                                      alpha_min=alpha_min, epsilon=epsilon,
-                                      epsilon_min=epsilon_min, epsilon_decay=epsilon_decay,
-                                      n_iter=n_iter)
-            row.append(results[3])  # timed
-            row.append(np.sum(np.absolute(np.array(vi) - np.array(pi))))
-            row.append(np.sum(np.absolute(results[0] - np.array(vi))))
-            row.append(np.sum(np.absolute(results[0] - np.array(pi))))
 
-            try:
-                df = pd.read_csv('{0}_qlearning_trials.csv'.format(self.name))
-                df.loc[len(df)] = row
-                df.to_csv('{0}_qlearning_trials.csv'.format(self.name), index=False)
-            except FileNotFoundError:
-                cols = ['trial', 'n_iter', 'gamma', 'alpha', 'alpha_decay', 'alpha_min',
-                        'epsilon', 'epsilon_decay', 'epsilon_min', 'time', 'vi_pi_error', 'vi_error', 'pi_error']
-                df = pd.DataFrame([row], columns=cols)
-                df.to_csv('{0}_qlearning_trials.csv'.format(self.name), index=False)
-
-    def q_learning(self, gamma=0.9, alpha=0.1, alpha_decay=0.99, alpha_min=0.1, epsilon=1.0,
-                   epsilon_min=0.1, epsilon_decay=0.99, n_iter=10000):
-        ql = mdp.QLearning(self.prob, self.rewards, gamma,
-                           alpha=alpha, alpha_decay=alpha_decay, alpha_min=alpha_min,
-                           epsilon=epsilon, epsilon_min=epsilon_min, epsilon_decay=epsilon_decay,
-                           n_iter=n_iter)
-        run_stats = ql.run()
-        # self.plot(run_stats, 'Frozen Lake - Q-Learning')
-        expected_values = ql.V
-        optimal_policy = ql.policy
-        time = ql.time
-        return [expected_values, optimal_policy, n_iter, time]
 
 if __name__ == '__main__':
     fl = FrozenLake(size=20)
@@ -174,8 +130,9 @@ if __name__ == '__main__':
     print('Eval : Policy Iteration Policy')
     fl.eval_policy(pi_policy, iterations=1000)
 
-    fl.q_learning_trials(trials=20,vi=vi,pi=pi)
-    ql, ql_policy, _,_ = fl.q_learning(gamma=0.9598,alpha=0.9464,alpha_decay=0.9998,alpha_min=0.07962,
+    ql = QLearner(fl.name, fl.prob, fl.rewards)
+    ql.q_learning_trials(trials=20,vi=vi,pi=pi)
+    ql, ql_policy, _,_ = ql.q_learning(gamma=0.9598,alpha=0.9464,alpha_decay=0.9998,alpha_min=0.07962,
                                        epsilon=0.9172,epsilon_decay=0.9998,n_iter=19000)
     fl.eval_policy(ql_policy,iterations=1000)
 
