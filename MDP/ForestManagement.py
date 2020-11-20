@@ -141,9 +141,9 @@ if __name__ == '__main__':
     # fm.eval_policy(pi_policy, iterations=1000)
 
     ql = QLearner(fm.name, fm.prob, fm.rewards)
-    # ql.q_learning_trials(trials=20, vi=vi, pi=pi)
-    ql, ql_policy, _, _ = ql.q_learning(gamma=0.9911, alpha=0.3695, alpha_decay=0.9998, alpha_min=0.0747,
-                                        epsilon=0.8608, epsilon_decay=0.9996, n_iter=47366)
+    ql.q_learning_trials(trials=20, vi=vi, pi=pi)
+    run_stats,ql_policy = ql.q_learning(gamma=0.9911, alpha=0.3695, alpha_decay=0.9998, alpha_min=0.0747,
+                                        epsilon=0.8608, epsilon_decay=0.9996, n_iter=47366,returnStats=True)
     print("QLearning Policy")
     firemdp.printPolicy(ql_policy)
     # fm.eval_policy(ql_policy, iterations=1000)

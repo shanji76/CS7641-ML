@@ -5,19 +5,20 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-from gym.envs.toy_text.frozen_lake import generate_random_map
+from gym.envs.toy_text.frozen_lake import generate_random_map, FrozenLakeEnv
 
 class FrozenLake():
     def __init__(self, size=10, p=0.8):
         self.name='frozenlake'
         self.size=size
         random_map = generate_random_map(size=size,p=p)
-        self.env = gym.make("FrozenLake-v0", desc=random_map)
+        self.env = gym.make("FrozenLake-v0", desc=random_map, is_slippery=True)
         self.env.seed(123)
         self.env.action_space.np_random.seed(123)
         self.env._max_episode_steps=20000
         self.prob = self.probability_matrix()
         self.rewards = self.rewards_matrix()
+        self.env.render()
 
     def probability_matrix(self):
         prob = np.zeros((self.env.nA, self.env.nS, self.env.nS))
@@ -82,8 +83,8 @@ class FrozenLake():
                 s_prime, reward, done, info = self.env.step(action)
                 state = s_prime
                 t_reward = self.tweak_reward(reward,done)
-                rewards.append(t_reward)
-                iter_reward += t_reward
+                rewards.append(reward)
+                iter_reward += reward
                 if done:
                     # print("episode: {}/{}, score: {:.2f}, steps: {}".format(i, iterations, iter_reward, steps))
                     break
@@ -99,7 +100,7 @@ class FrozenLake():
 
     def tweak_reward(self, reward, done):
         if reward == 0:
-            reward = -0.001
+            reward = 0.001
         if done:
             if reward < 1:
                 reward = -1
@@ -118,6 +119,15 @@ class FrozenLake():
         plot_df.plot(x='Time', y='Error', title=title)
         plt.show()
 
+    def plotQlearn(self, stats, title):
+        plot_df = pd.DataFrame()
+        plot_df['Iterations'] = range(1, len(stats) + 1)
+        plot_df['Mean-V'] = [rs['Mean V'] for rs in stats]
+
+        plt.figure()
+        plot_df.plot(x='Iterations', y='Mean-V', title=title)
+        plt.show()
+
 
 
 if __name__ == '__main__':
@@ -132,9 +142,10 @@ if __name__ == '__main__':
 
     ql = QLearner(fl.name, fl.prob, fl.rewards)
     ql.q_learning_trials(trials=20,vi=vi,pi=pi)
-    ql, ql_policy, _,_ = ql.q_learning(gamma=0.9598,alpha=0.9464,alpha_decay=0.9998,alpha_min=0.07962,
-                                       epsilon=0.9172,epsilon_decay=0.9998,n_iter=19000)
-    fl.eval_policy(ql_policy,iterations=1000)
+    run_stats,ql_policy = ql.q_learning(gamma=0.999,alpha=0.45,alpha_decay=0.999907088,alpha_min=0.082682664,
+                                       epsilon=0.968587999,epsilon_min=0.148113184, epsilon_decay=0.996218224, n_iter=60000, returnStats=True)
+    fl.plotQlearn(run_stats, 'Frozen Lake - Q-Learning')
+    # fl.eval_policy(ql_policy,iterations=1000)
 
     sys.exit()
 
